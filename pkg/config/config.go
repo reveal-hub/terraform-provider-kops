@@ -94,7 +94,9 @@ func initAwsCredentials(ctx context.Context, config *config.Aws) error {
 		os.Setenv("AWS_PROFILE", config.Profile)
 	}
 	if config.AssumeRole != nil {
-		svc := sts.New(sts.Options{})
+		svc := sts.New(sts.Options{
+			Region: config.Region,
+		})
 		input := &sts.AssumeRoleInput{
 			RoleArn:         aws.String(config.AssumeRole.RoleArn),
 			RoleSessionName: aws.String("TF-PROVIDER-KOPS"),
