@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -80,14 +81,13 @@ func initAwsCredentials(ctx context.Context, config *config.Aws) error {
 		return nil
 	}
 	setEnvVarSimple("AWS_DEFAULT_REGION", config.Region)
-	if config.AssumeRole == nil {
-		setEnvVarSimple("AWS_ACCESS_KEY_ID", config.AccessKey)
-		setEnvVarSimple("AWS_SECRET_ACCESS_KEY", config.SecretKey)
-		setEnvVarSimple("S3_ENDPOINT", config.S3Endpoint)
-		setEnvVarSimple("S3_REGION", config.S3Region)
-		setEnvVarSimple("S3_ACCESS_KEY_ID", config.S3AccessKey)
-		setEnvVarSimple("S3_SECRET_ACCESS_KEY", config.S3SecretKey)
-	}
+	setEnvVarSimple("AWS_ACCESS_KEY_ID", config.AccessKey)
+	setEnvVarSimple("AWS_SECRET_ACCESS_KEY", config.SecretKey)
+	setEnvVarSimple("S3_ENDPOINT", config.S3Endpoint)
+	setEnvVarSimple("S3_REGION", config.S3Region)
+	setEnvVarSimple("S3_ACCESS_KEY_ID", config.S3AccessKey)
+	setEnvVarSimple("S3_SECRET_ACCESS_KEY", config.S3SecretKey)
+
 	if config.SkipRegionCheck {
 		os.Setenv("SKIP_REGION_CHECK", "1")
 	}
@@ -96,9 +96,10 @@ func initAwsCredentials(ctx context.Context, config *config.Aws) error {
 		os.Setenv("AWS_PROFILE", config.Profile)
 	}
 	if config.AssumeRole != nil {
-		svc := sts.New(sts.Options{
-			Region: config.Region,
-		})
+		cfg, err = config.LoadDefaultConfig(context.TODO())
+		//FIXME: handle errors here 
+			
+		svc := sts.NewFromConfig(cfg)
 		input := &sts.AssumeRoleInput{
 			RoleArn:         aws.String(config.AssumeRole.RoleArn),
 			RoleSessionName: aws.String("TF-PROVIDER-KOPS"),
