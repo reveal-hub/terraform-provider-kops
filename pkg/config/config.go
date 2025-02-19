@@ -96,9 +96,13 @@ func initAwsCredentials(ctx context.Context, config *config.Aws) error {
 		os.Setenv("AWS_PROFILE", config.Profile)
 	}
 	if config.AssumeRole != nil {
-		cfg, err := awssdkconfig.LoadDefaultConfig(ctx)
-		//FIXME: handle errors here 
-			
+		cfg, err := awssdkconfig.LoadDefaultConfig(ctx,
+			awssdkconfig.WithRegion(config.Region),
+			awssdkconfig.WithSharedConfigProfile(config.Profile),
+		)
+		if err != nil {
+			return err
+		}
 		svc := sts.NewFromConfig(cfg)
 		input := &sts.AssumeRoleInput{
 			RoleArn:         aws.String(config.AssumeRole.RoleArn),
