@@ -96,7 +96,7 @@ func initAwsCredentials(ctx context.Context, config *config.Aws) error {
 		os.Setenv("AWS_PROFILE", config.Profile)
 	}
 	if config.AssumeRole != nil {
-		cfg, err := awssdkconfig.LoadDefaultConfig(context.TODO())
+		cfg, err := awssdkconfig.LoadDefaultConfig(ctx)
 		//FIXME: handle errors here 
 			
 		svc := sts.NewFromConfig(cfg)
