@@ -95,26 +95,13 @@ func initAwsCredentials(ctx context.Context, config *config.Aws) error {
 		os.Setenv("AWS_SDK_LOAD_CONFIG", "1")
 		os.Setenv("AWS_PROFILE", config.Profile)
 	}
-	if config.AssumeRole != nil {
-		cfg, err := awssdkconfig.LoadDefaultConfig(ctx,
-			awssdkconfig.WithRegion(config.Region),
-			awssdkconfig.WithSharedConfigProfile(config.Profile),
-		)
-		if err != nil {
-			return err
-		}
-		svc := sts.NewFromConfig(cfg)
-		input := &sts.AssumeRoleInput{
-			RoleArn:         aws.String(config.AssumeRole.RoleArn),
-			RoleSessionName: aws.String("TF-PROVIDER-KOPS"),
-		}
-		result, err := svc.AssumeRole(ctx, input)
-		if err != nil {
-			return err
-		}
-		os.Setenv("AWS_ACCESS_KEY_ID", *result.Credentials.AccessKeyId)
-		os.Setenv("AWS_SECRET_ACCESS_KEY", *result.Credentials.SecretAccessKey)
-		os.Setenv("AWS_SESSION_TOKEN", *result.Credentials.SessionToken)
+	// The AWS SDK will automatically handle role assumption using AWS_ROLE_ARN and AWS_WEB_IDENTITY_TOKEN
+	_, err := awssdkconfig.LoadDefaultConfig(ctx,
+		awssdkconfig.WithRegion(config.Region),
+		awssdkconfig.WithSharedConfigProfile(config.Profile),
+	)
+	if err != nil {
+		return err
 	}
 	return nil
 }
