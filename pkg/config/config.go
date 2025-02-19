@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
+	awssdkconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -96,7 +96,7 @@ func initAwsCredentials(ctx context.Context, config *config.Aws) error {
 		os.Setenv("AWS_PROFILE", config.Profile)
 	}
 	if config.AssumeRole != nil {
-		cfg, err = config.LoadDefaultConfig(context.TODO())
+		cfg, err := awssdkconfig.LoadDefaultConfig(context.TODO())
 		//FIXME: handle errors here 
 			
 		svc := sts.NewFromConfig(cfg)
